@@ -1,18 +1,9 @@
 const express = require("express");
-
 const router = express.Router();
-
 const knex = require("knex");
+const knexConfig = require("../knexfile");
 
-const knexConfig = {
-  client: "sqlite3",
-  connection: {
-    filename: "./data/lambda.db3"
-  },
-  useNullAsDefault: true // needed for sqlite
-};
-
-const db = knex(knexConfig);
+const db = knex(knexConfig.development);
 
 router.use(express.json());
 
@@ -110,6 +101,18 @@ router.delete("/:id", async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ message: "The cohort could not be deleted" });
+  }
+});
+
+// get all students for the cohort with the specified id
+router.get("/:id/students", async (req, res) => {
+  try {
+    const students = await db("students").where({ cohort_id: req.params.id });
+    res.status(200).json(students);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "The cohort information could not be retrieved." });
   }
 });
 
